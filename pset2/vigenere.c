@@ -1,4 +1,4 @@
-/*
+/* 
     vigenere.c
     
     Author: John C, @JaxomofRuatha
