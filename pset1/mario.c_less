@@ -1,0 +1,43 @@
+/*
+    mario.c
+    
+    Author: John C, @JaxomofRuatha
+    
+    Solution for CS50 Problem Set 1 "mario" - LESS COMFORTABLE
+*/
+
+#include <stdio.h>
+#include <cs50.h>
+
+int main(void)
+{
+    int height;
+    int numRows;
+    int space;
+    int stack;
+    
+    //Asks user for pyramid height until valid
+    do
+    {
+        printf("Height: ");
+        height = GetInt();
+    }
+    
+    while (height > 23 || height < 0);
+    
+    //Loop creating number of levels in pyramid as specified
+    for (numRows = 1; numRows <= height; numRows++)
+        {
+            for (space = (height - numRows); space > 0; space--)
+            {
+                printf(" ");
+            }
+            
+            for (stack = 0; stack < numRows; stack++)
+                {
+                    printf("#");
+                    
+                }
+            printf("\n");
+        }
+}
