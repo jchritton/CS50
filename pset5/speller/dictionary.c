@@ -1,7 +1,8 @@
 /**
  * Implements a dictionary's functionality.
  */
-
+#include <stdio.h>
+#include <string.h>
 #include <stdbool.h>
 
 #include "dictionary.h"
@@ -11,8 +12,26 @@
  */
 bool check(const char *word)
 {
-    // TODO
-    return false;
+	int level;
+	int length = strlen(word);
+	int cur_child;
+
+	node crawl_temp = *root;
+
+	for (level = 0; level < length; level++)
+	{
+		cur_child = char_index(&word[level]);
+		if (crawl_temp.children[cur_child] == NULL)
+		{
+			return false;
+		}
+
+		crawl_temp = crawl_temp.children[cur_child];
+	}
+    if (crawl_temp != NULL && crawl_temp.is_word = true)
+    {
+        return true;
+    }
 }
 
 /**
@@ -20,8 +39,36 @@ bool check(const char *word)
  */
 bool load(const char *dictionary)
 {
-    //TODO	
-    return false;
+  //Open dictionary file, error if does not open.
+  FILE* dict_in = fopen(dictionary, "rb");
+  if (dict_in == NULL)
+	{
+		fprintf(stderr, "Could not open dictionary file.\n");
+		return false;
+	}
+
+  char *cur_word[LENGTH];
+  *root = new_node();
+
+	while(1)
+	{
+		//Gets characters one at a time from dictionary file.
+		int c = fgetc(dict_in);
+		int word_index = 0;
+
+  	if (c != '\n')
+  	{
+    	//Create a string for the current word being stored.
+    	cur_word[word_index] = (char)c;
+    	word_index++;
+  	}
+  	else
+  	{
+    	//Check for the word in the trie, insert if doesn't exist.
+		insert_node(root, cur_word);
+  	}
+	}
+  return false;
 }
 
 /**
@@ -29,7 +76,10 @@ bool load(const char *dictionary)
  */
 unsigned int size(void)
 {
-    // TODO
+		if (!*root)
+		{
+			return *word_count;
+		}
     return 0;
 }
 
@@ -38,6 +88,13 @@ unsigned int size(void)
  */
 bool unload(void)
 {
-    // TODO
-    return false;
+	free_trie(root);
+	if (!root)
+	{
+		return true;
+	}
+	else
+	{
+  	return false;
+	}
 }
