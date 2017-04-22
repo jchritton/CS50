@@ -15,11 +15,7 @@
 #define LENGTH 45
 #define ALPHABET_SIZE 26
 
-int char_index(const char *c)
-{
-    int index_result = (int)c - (int)'a';
-    return index_result;
-}
+int char_index(const char *c);
 
 //Defining nodes for use in the trie structure.
 typedef struct node
@@ -30,62 +26,12 @@ typedef struct node
 }
 node;
 
-//Counter for number of words in dictionary.
-int *word_count = 0;
-node *root = NULL;
-
 //Returns a new trie node
-struct node *new_node(void)
-{
-  struct node *tNode = NULL;
+struct node *new_node(void);
 
-  tNode = (struct node *)malloc(sizeof(node));
+void insert_node(node *root, char cur_word[LENGTH]);
 
-  if (tNode)
-  {
-    tNode->is_word = false;
-
-    for (int i = 0; i < ALPHABET_SIZE; i++)
-    {
-      tNode->children[i] = NULL;
-    }
-  }
-
-  return tNode;
-}
-
-void insert_node(node *root, char *cur_word[LENGTH])
-{
-    int level;
-    int length = strlen(*cur_word);
-    int cur_child;
-
-    node *crawl_temp = root;
-
-	for (level = 0; level < length; level++)
-	{
-		cur_child = char_index(cur_word[level]);
-		if (crawl_temp->children[cur_child] == NULL)
-		{
-			crawl_temp->children[cur_child] = new_node();
-		}
-		crawl_temp = crawl_temp->children[cur_child];
-	}
-	crawl_temp->is_word = true;
-	word_count++;
-}
-
-void free_trie(node *root)
-{
-	for (int i = 0; i < ALPHABET_SIZE; i++)
-	{
-		if (root->children[i] != NULL)
-		{
-			free_trie(root->children[i]);
-		}
-	}
-	free(root);
-}
+void free_trie(node *root);
 
 /**
  * Returns true if word is in dictionary else false.
