@@ -9,14 +9,66 @@
 #include <ctype.h>
 #include "dictionary.h"
 
-//Counter for number of words in dictionary.
-int *word_count = 0;
 node *root = NULL;
+char cur_word[LENGTH] = "";
+//Counter for number of words in dictionary.
+unsigned int word_count = 0;
 
-int char_index(const char *c)
+/**
+ * Loads dictionary into memory. Returns true if successful else false.
+ */
+bool load(const char *dictionary)
 {
-    int index_result = (int)c - (int)'a';
-    return index_result;
+	//Open dictionary file, error if does not open.
+	FILE* dict_in = fopen(dictionary, "rb");
+	if (dict_in == NULL)
+	{
+		fprintf(stderr, "Could not open dictionary file.\n");
+		return false;
+	}
+	
+	int word_index = 0;
+	
+	while(feof(dict_in) == 0)
+	{
+		//Gets characters one at a time from dictionary file.
+		int c = fgetc(dict_in);
+
+  		if (c != '\n')
+		{
+    	//Create a string for the current word being stored.
+    	cur_word[word_index] = (char)c;
+    	word_index++;
+		}
+		else
+  		{
+    	//Check for the word in the trie, insert if doesn't exist.
+		insert_node(&root, cur_word);
+  		}
+	}
+  return true;
+}
+
+void insert_node(node **root, char cur_word[LENGTH])
+{
+    int level;
+    int length = strlen(cur_word);
+    int cur_child;
+    
+	*root = new_node();
+    node *crawl_temp = *root;
+
+	for (level = 0; level < length; level++)
+	{
+		cur_child = tolower(cur_word[level]) - 97;
+		if (crawl_temp->children[cur_child] == NULL)
+		{
+			crawl_temp->children[cur_child] = new_node();
+		}
+		crawl_temp = crawl_temp->children[cur_child];
+	}
+	crawl_temp->is_word = true;
+	word_count++;
 }
 
 //Returns a new trie node
@@ -39,42 +91,6 @@ struct node *new_node(void)
   return tNode;
 }
 
-void insert_node(node *root, char cur_word[LENGTH])
-{
-    int level;
-    int length = strlen(cur_word);
-    int cur_child;
-
-    node *crawl_temp = root;
-
-	for (level = 0; level < length; level++)
-	{
-		cur_child = char_index(&cur_word[level]);
-		if (crawl_temp->children[cur_child] == NULL)
-		{
-			crawl_temp->children[cur_child] = new_node();
-		}
-		crawl_temp = crawl_temp->children[cur_child];
-	}
-	crawl_temp->is_word = true;
-	word_count++;
-}
-
-void free_trie(node *root)
-{
-	for (int i = 0; i < ALPHABET_SIZE; i++)
-	{
-		if (root->children[i] != NULL)
-		{
-			free_trie(root->children[i]);
-		}
-	}
-	free(root);
-	root = NULL;
-}
-
-
-
 /**
  * Returns true if word is in dictionary else false.
  */
@@ -88,7 +104,7 @@ bool check(const char *word)
 
 	for (level = 0; level < length; level++)
 	{
-		cur_child = char_index(&word[level]);
+		cur_child = (tolower(word[level]) - 97) % 26;
 		if (crawl_temp->children[cur_child] == NULL)
 		{
 			return false;
@@ -104,52 +120,25 @@ bool check(const char *word)
 }
 
 /**
- * Loads dictionary into memory. Returns true if successful else false.
- */
-bool load(const char *dictionary)
-{
-  //Open dictionary file, error if does not open.
-  FILE* dict_in = fopen(dictionary, "rb");
-  if (dict_in == NULL)
-	{
-		fprintf(stderr, "Could not open dictionary file.\n");
-		return false;
-	}
-
-  char cur_word[LENGTH];
-  root = new_node();
-
-	while(1)
-	{
-		//Gets characters one at a time from dictionary file.
-		int c = fgetc(dict_in);
-		int word_index = 0;
-
-  	if (c != '\n')
-  	{
-    	//Create a string for the current word being stored.
-    	cur_word[word_index] = (char)c;
-    	word_index++;
-  	}
-  	else
-  	{
-    	//Check for the word in the trie, insert if doesn't exist.
-		insert_node(root, cur_word);
-  	}
-	}
-  return false;
-}
-
-/**
  * Returns number of words in dictionary if loaded else 0 if not yet loaded.
  */
 unsigned int size(void)
 {
-	if (root != NULL)
+	printf("%d", word_count);
+	return word_count;
+}
+
+void free_trie(node *root)
+{
+	for (int i = 0; i < ALPHABET_SIZE; i++)
+	{
+		if (root->children[i] != NULL)
 		{
-			return *word_count;
+			free_trie(root->children[i]);
 		}
-    return 0;
+	}
+	free(root);
+	root = NULL;
 }
 
 /**
@@ -164,6 +153,6 @@ bool unload(void)
 	}
 	else
 	{
-  	return false;
+  		return false;
 	}
 }
